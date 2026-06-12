@@ -1,0 +1,6 @@
+{
+  "name": "Calculadora de Corte de Papel",
+  "description": "Calculadora inteligente para optimizar el corte de pliegos de papel, calcular el rendimiento, piezas por pliego y la cantidad de papel necesaria para órdenes de trabajo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
