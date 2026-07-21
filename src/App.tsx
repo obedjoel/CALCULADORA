@@ -100,8 +100,8 @@ export default function App() {
   const [selectedFormatId, setSelectedFormatId] = useState<string>('a5'); // Default to A5 (yielding 16, size 15.25 x 21.5 cm)
   
   // Custom tracking for target work details
-  const [targetQuantity, setTargetQuantity] = useState<number>(1000); // Default to 1000
-  const [wastePercentage, setWastePercentage] = useState<number>(5); // Default to 5%
+  const [targetQuantity, setTargetQuantity] = useState<number | ''>(1000); // Default to 1000
+  const [wastePercentage, setWastePercentage] = useState<number | ''>(5); // Default to 5%
   
   // Custom dimensions inputs (only active when custom is selected)
   const [customWidth, setCustomWidth] = useState<string>('12');
@@ -109,8 +109,8 @@ export default function App() {
   
   // Toggle for showing advanced settings (like margin and gutter for custom pieces)
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
-  const [sheetMargin, setSheetMargin] = useState<number>(0); // Default 0 for clean division
-  const [pieceGutter, setPieceGutter] = useState<number>(0); // Default 0
+  const [sheetMargin, setSheetMargin] = useState<number | ''>(0); // Default 0 for clean division
+  const [pieceGutter, setPieceGutter] = useState<number | ''>(0); // Default 0
   const [fiberDirection, setFiberDirection] = useState<'any' | 'with-width' | 'with-length'>('any');
 
   const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
@@ -142,10 +142,10 @@ export default function App() {
       sheetLength: 86, // Locked at 86 cm
       pieceWidth,
       pieceLength,
-      sheetMargin: isCustomMode ? sheetMargin : 0, // Clean cut divisions require 0 margin
-      pieceGutter: isCustomMode ? pieceGutter : 0, // Clean cut divisions require 0 gutter
-      targetQuantity,
-      wastePercentage,
+      sheetMargin: isCustomMode ? (sheetMargin === '' ? 0 : sheetMargin) : 0, // Clean cut divisions require 0 margin
+      pieceGutter: isCustomMode ? (pieceGutter === '' ? 0 : pieceGutter) : 0, // Clean cut divisions require 0 gutter
+      targetQuantity: targetQuantity === '' ? 0 : targetQuantity,
+      wastePercentage: wastePercentage === '' ? 0 : wastePercentage,
       fiberDirection: isCustomMode ? fiberDirection : 'any'
     };
   }, [
@@ -194,8 +194,10 @@ export default function App() {
       const match = STANDARD_FORMATS.find(f => f.id === selectedFormatId);
       if (match) {
         // Enforce layout totals exactly matching standard presets
-        const netSheets = Math.ceil(targetQuantity / match.yieldPerSheet);
-        const sheetsWithWaste = Math.ceil(netSheets * (1 + wastePercentage / 100));
+        const numericTargetQty = targetQuantity === '' ? 0 : targetQuantity;
+        const numericWastePct = wastePercentage === '' ? 0 : wastePercentage;
+        const netSheets = Math.ceil(numericTargetQty / match.yieldPerSheet);
+        const sheetsWithWaste = Math.ceil(netSheets * (1 + numericWastePct / 100));
         return {
           ...current,
           piecesPerSheet: match.yieldPerSheet,
@@ -238,16 +240,16 @@ export default function App() {
   }, [selectedFormatId, isCustomMode, customWidth, customLength, activeLayout.piecesPerSheet]);
 
   return (
-    <div className="min-h-screen bg-[#F4F6FA] text-slate-800 pb-16 antialiased selection:bg-indigo-100 selection:text-indigo-900 print:bg-white print:text-black print:pb-0 font-sans">
+    <div className="min-h-screen bg-[#020617] text-slate-100 pb-16 antialiased selection:bg-indigo-100 selection:text-indigo-900 print:bg-slate-900 print:text-white print:pb-0 font-sans">
       
       {/* HEADER SECTION */}
-      <header className="bg-white/90 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50 print:relative print:border-none print:shadow-none shadow-sm">
+      <header className="bg-slate-950/90 backdrop-blur-md border-b border-slate-700/60 sticky top-0 z-50 print:relative print:border-none print:shadow-none shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center">
           <div className="flex items-center gap-3">
             <div className="bg-indigo-600 text-white p-2.5 rounded-2xl flex items-center justify-center shadow-sm shadow-indigo-100">
               <Scissors className="h-5 w-5 stroke-[2.5]" />
             </div>
-            <h1 className="text-base sm:text-lg font-bold text-slate-900 uppercase tracking-tight leading-none font-display">
+            <h1 className="text-base sm:text-lg font-bold text-slate-50 uppercase tracking-tight leading-none font-display">
               Calculadora de Corte y Pliegos
             </h1>
           </div>
@@ -264,14 +266,14 @@ export default function App() {
           <div className="space-y-6">
             
             {/* INPUTS CONTROL CONTAINER */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/50 space-y-6 text-slate-800">
+            <div className="bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-700/50 space-y-6 text-slate-100">
               
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg">
+                  <div className="p-1.5 bg-indigo-900/30 text-indigo-400 rounded-lg">
                     <Calculator className="h-4 w-4" />
                   </div>
-                  <h3 className="text-xs font-bold text-slate-700 uppercase tracking-widest font-sans">
+                  <h3 className="text-xs font-bold text-slate-200 uppercase tracking-widest font-sans">
                     PANEL DE AJUSTES
                   </h3>
                 </div>
@@ -295,12 +297,12 @@ export default function App() {
                         onClick={() => handleSelectFormat(col.id)}
                         className={`px-3.5 py-2.5 text-left border rounded-xl transition-all cursor-pointer flex items-center justify-between gap-3 text-xs ${
                           isSelected
-                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                            : 'bg-white text-slate-800 border-slate-200/80 hover:border-slate-300 hover:bg-slate-50/50'
+                            ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm'
+                            : 'bg-slate-900 text-slate-100 border-slate-700/80 hover:border-slate-500 hover:bg-slate-800/50'
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <span className={`text-[10px] font-bold tracking-tight px-1.5 py-0.5 rounded-md ${isSelected ? 'bg-indigo-900 text-white' : 'bg-slate-100 text-slate-700'}`}>
+                          <span className={`text-[10px] font-bold tracking-tight px-1.5 py-0.5 rounded-md ${isSelected ? 'bg-indigo-900 text-white' : 'bg-slate-800 text-slate-200'}`}>
                             {col.name}
                           </span>
                           <span className={`text-[9px] font-medium ${isSelected ? 'text-indigo-200' : 'text-slate-400'}`}>
@@ -325,13 +327,13 @@ export default function App() {
                     onClick={() => handleSelectFormat('custom')}
                     className={`px-3.5 py-2.5 text-left border rounded-xl transition-all cursor-pointer flex items-center justify-between gap-3 text-xs ${
                       selectedFormatId === 'custom'
-                        ? 'bg-amber-50 text-amber-900 border-2 border-amber-300 font-bold shadow-sm'
-                        : 'bg-white text-slate-800 border-slate-200/80 hover:bg-slate-50/50 hover:border-slate-350'
+                        ? 'bg-amber-900/30 text-amber-200 border-2 border-amber-700 font-bold shadow-sm'
+                        : 'bg-slate-900 text-slate-100 border-slate-700/80 hover:bg-slate-800/50 hover:border-slate-500'
                     }`}
                   >
                     <div className="flex items-center gap-1.5">
                       <Sparkles className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-                      <span className="text-xs font-bold text-slate-900">Medida Personalizada</span>
+                      <span className="text-xs font-bold text-slate-50">Medida Personalizada</span>
                     </div>
                     <span className="text-[10px] font-medium text-slate-500">
                       Dimensiones libres
@@ -342,10 +344,10 @@ export default function App() {
 
               {/* CONDITIONAL SUB-FORM: CUSTOM DIMENSIONS */}
               {isCustomMode && (
-                <div id="custom-dims-box" className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-4">
-                  <div className="flex items-center gap-2 pb-2 border-b border-slate-200/50">
+                <div id="custom-dims-box" className="p-4 bg-slate-800 border border-slate-700/80 rounded-2xl space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-slate-700/50">
                     <Crop className="h-4 w-4 text-slate-500" />
-                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-700">Medidas de la Pieza Personalizada</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-200">Medidas de la Pieza Personalizada</h4>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3.5">
@@ -361,7 +363,7 @@ export default function App() {
                           min="0.5"
                           value={customWidth}
                           onChange={(e) => setCustomWidth(e.target.value)}
-                          className="w-full text-slate-800 bg-white border border-slate-250 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-center font-mono font-bold relative pr-8 transition-all"
+                          className="w-full text-slate-100 bg-slate-900 border border-slate-600 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-center font-mono font-bold relative pr-8 transition-all"
                           placeholder="Ancho"
                         />
                         <span className="absolute right-2.5 top-2 text-[10px] font-bold text-slate-400 font-mono pointer-events-none select-none">
@@ -382,7 +384,7 @@ export default function App() {
                           min="0.5"
                           value={customLength}
                           onChange={(e) => setCustomLength(e.target.value)}
-                          className="w-full text-slate-800 bg-white border border-slate-250 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-center font-mono font-bold relative pr-8 transition-all"
+                          className="w-full text-slate-100 bg-slate-900 border border-slate-600 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none rounded-xl px-3 py-2 text-xs text-center font-mono font-bold relative pr-8 transition-all"
                           placeholder="Largo"
                         />
                         <span className="absolute right-2.5 top-2 text-[10px] font-bold text-slate-400 font-mono pointer-events-none select-none">
@@ -397,14 +399,14 @@ export default function App() {
                     <button
                       id="toggle-advanced-btn"
                       onClick={() => setShowAdvanced(!showAdvanced)}
-                      className="text-[10px] font-bold text-slate-650 uppercase flex items-center gap-1.5 hover:text-indigo-600 cursor-pointer bg-white border border-slate-200 hover:border-slate-350 px-3 py-2 rounded-xl transition-all"
+                      className="text-[10px] font-bold text-slate-300 uppercase flex items-center gap-1.5 hover:text-indigo-400 cursor-pointer bg-slate-900 border border-slate-700 hover:border-slate-500 px-3 py-2 rounded-xl transition-all"
                     >
                       <Settings className="h-3 w-3" />
                       <span>{showAdvanced ? 'Ocultar Opciones Avanzadas' : 'Ver Opciones Avanzadas'}</span>
                     </button>
 
                     {showAdvanced && (
-                      <div id="advanced-configs" className="p-3.5 bg-white border border-slate-255/80 rounded-xl mt-2 space-y-4">
+                      <div id="advanced-configs" className="p-3.5 bg-slate-900 border border-slate-700 rounded-xl mt-2 space-y-4">
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wide mb-1">
@@ -415,8 +417,11 @@ export default function App() {
                               step="0.1"
                               min="0"
                               value={sheetMargin}
-                              onChange={(e) => setSheetMargin(Math.max(0, parseFloat(e.target.value) || 0))}
-                              className="w-full text-xs font-mono font-bold border border-slate-200 rounded-lg bg-slate-50 text-center p-1.5 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setSheetMargin(val === '' ? '' : Math.max(0, parseFloat(val) || 0));
+                              }}
+                              className="w-full text-xs font-mono font-bold border border-slate-700 rounded-lg bg-slate-800 text-center p-1.5 focus:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                             />
                           </div>
                           <div>
@@ -428,8 +433,11 @@ export default function App() {
                               step="0.1"
                               min="0"
                               value={pieceGutter}
-                              onChange={(e) => setPieceGutter(Math.max(0, parseFloat(e.target.value) || 0))}
-                              className="w-full text-xs font-mono font-bold border border-slate-200 rounded-lg bg-slate-50 text-center p-1.5 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setPieceGutter(val === '' ? '' : Math.max(0, parseFloat(val) || 0));
+                              }}
+                              className="w-full text-xs font-mono font-bold border border-slate-700 rounded-lg bg-slate-800 text-center p-1.5 focus:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                             />
                           </div>
                         </div>
@@ -441,19 +449,19 @@ export default function App() {
                           <div className="grid grid-cols-3 gap-1.5 text-[9px] font-bold">
                             <button
                               onClick={() => setFiberDirection('any')}
-                              className={`p-1.5 rounded-lg border cursor-pointer text-center transition-all ${fiberDirection === 'any' ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}
+                              className={`p-1.5 rounded-lg border cursor-pointer text-center transition-all ${fiberDirection === 'any' ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'}`}
                             >
                               Cualquiera
                             </button>
                             <button
                               onClick={() => setFiberDirection('with-width')}
-                              className={`p-1.5 rounded-lg border cursor-pointer text-center transition-all ${fiberDirection === 'with-width' ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}
+                              className={`p-1.5 rounded-lg border cursor-pointer text-center transition-all ${fiberDirection === 'with-width' ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'}`}
                             >
                               Ancho (W)
                             </button>
                             <button
                               onClick={() => setFiberDirection('with-length')}
-                              className={`p-1.5 rounded-lg border cursor-pointer text-center transition-all ${fiberDirection === 'with-length' ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}
+                              className={`p-1.5 rounded-lg border cursor-pointer text-center transition-all ${fiberDirection === 'with-length' ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'}`}
                             >
                               Largo (L)
                             </button>
@@ -467,9 +475,8 @@ export default function App() {
               )}
 
               {/* INPUTS: TARGET QUANTITY AND WASTE BUFFER */}
-              <div className="pt-4 border-t border-slate-100 space-y-4">
-                
-                {/* TARGET VOLANTES */}
+              <div className="pt-4 border-t border-slate-800 space-y-4">
+                            {/* TARGET VOLANTES */}
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                     CANTIDAD TOTAL DE TRABAJO (OBJETIVO REQUERIDO)
@@ -478,23 +485,26 @@ export default function App() {
                     <input
                       id="target-qty-input"
                       type="number"
-                      min="1"
+                      min="0"
                       value={targetQuantity}
-                      onChange={(e) => setTargetQuantity(Math.max(1, parseInt(e.target.value) || 0))}
-                      className="w-full text-slate-800 bg-slate-50 focus:bg-white border border-slate-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none rounded-2xl px-4 py-2.5 text-sm text-center font-mono font-bold transition-all"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setTargetQuantity(val === '' ? '' : Math.max(0, parseInt(val) || 0));
+                      }}
+                      className="w-full text-slate-100 bg-slate-800 focus:bg-slate-800 border border-slate-700 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none rounded-2xl px-4 py-2.5 text-sm text-center font-mono font-bold transition-all"
                       placeholder="Ej: 1000, 2000, 500"
                     />
                     <span className="absolute right-4 top-3 text-[10px] font-bold text-slate-400 font-mono pointer-events-none select-none">
                       uds
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {[500, 1000, 2000, 5000, 8000].map((qty) => (
+                  <div className="flex flex-wrap gap-1.5 mt-2 justify-center">
+                    {[100, 500, 1000, 2000, 4000, 5000, 8000, 10000, 12000, 16000].map((qty) => (
                       <button
                         key={qty}
                         onClick={() => setTargetQuantity(qty)}
                         className={`text-[9px] font-bold px-3 py-1 rounded-full border cursor-pointer transition-all ${
-                          targetQuantity === qty ? 'bg-indigo-650 text-white border-indigo-650 shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                          targetQuantity === qty ? 'bg-indigo-650 text-white border-indigo-650 shadow-sm' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
                         }`}
                       >
                         {qty.toLocaleString()}
@@ -509,7 +519,7 @@ export default function App() {
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                       DEMASÍA DE MERMA DE AJUSTE (%)
                     </label>
-                    <span className="text-[10px] font-bold text-indigo-600 font-mono">
+                    <span className="text-[10px] font-bold text-indigo-400 font-mono">
                       {wastePercentage}%
                     </span>
                   </div>
@@ -520,8 +530,11 @@ export default function App() {
                       min="0"
                       max="100"
                       value={wastePercentage}
-                      onChange={(e) => setWastePercentage(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full text-slate-800 bg-slate-50 focus:bg-white border border-slate-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none rounded-2xl px-4 py-2.5 text-sm text-center font-mono font-bold transition-all"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setWastePercentage(val === '' ? '' : Math.max(0, Math.min(100, parseInt(val) || 0)));
+                      }}
+                      className="w-full text-slate-100 bg-slate-800 focus:bg-slate-800 border border-slate-700 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 focus:outline-none rounded-2xl px-4 py-2.5 text-sm text-center font-mono font-bold transition-all"
                     />
                     <span className="absolute right-4 top-3 text-[10px] font-bold text-slate-400 font-mono pointer-events-none select-none">
                       %
@@ -533,7 +546,7 @@ export default function App() {
                         key={pct}
                         onClick={() => setWastePercentage(pct)}
                         className={`text-[9px] font-bold px-3 py-1 rounded-full border cursor-pointer transition-all ${
-                          wastePercentage === pct ? 'bg-indigo-650 text-white border-indigo-650 shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                          wastePercentage === pct ? 'bg-indigo-650 text-white border-indigo-650 shadow-sm' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
                         }`}
                       >
                         {pct}%
@@ -547,7 +560,7 @@ export default function App() {
 
             {/* CÓMPUTO DE PLIEGOS REQUERIDOS */}
             {activeLayout && (
-              <div id="quick-calc-results" className="bg-slate-900 text-white p-6 rounded-3xl shadow-lg border border-slate-950/20 space-y-4 relative overflow-hidden">
+              <div id="quick-calc-results" className="bg-slate-950 text-white p-6 rounded-3xl shadow-lg border border-slate-950/20 space-y-4 relative overflow-hidden">
                 <div className="flex items-center justify-between pb-2.5 border-b border-slate-800">
                   <div className="flex items-center gap-1.5">
                     <span className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
@@ -555,7 +568,7 @@ export default function App() {
                       CÓMPUTO DE PLIEGOS REQUERIDOS
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded-full font-bold border border-indigo-500/30">
+                  <span className="text-[10px] font-mono px-2 py-0.5 bg-indigo-600/20 text-indigo-300 rounded-full font-bold border border-indigo-500/30">
                     {activeLayout.piecesPerSheet} × Pliego
                   </span>
                 </div>
@@ -599,11 +612,11 @@ export default function App() {
             )}
 
             {/* QUICK FORMULA INSIGHT BANNER */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm text-xs text-slate-600 space-y-2">
+            <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 shadow-sm text-xs text-slate-300 space-y-2">
               <div className="text-[10px] font-bold text-slate-400 tracking-wider">MÉTODO DE CÁLCULO</div>
               <ul className="space-y-1 list-disc pl-4 font-semibold text-[11px] text-slate-500">
-                <li>Pliegos netos = <span className="font-mono text-slate-800 font-black">Math.ceil(Objetivo / Rendimiento)</span></li>
-                <li>Con Demasía = <span className="font-mono text-slate-800 font-black">Math.ceil(Neto * 1.{wastePercentage})</span></li>
+                <li>Pliegos netos = <span className="font-mono text-slate-100 font-black">Math.ceil(Objetivo / Rendimiento)</span></li>
+                <li>Con Demasía = <span className="font-mono text-slate-100 font-black">Math.ceil(Neto * 1.{wastePercentage})</span></li>
                 <li>Rendimiento estándar basado en la división del pliego sin excedentes.</li>
               </ul>
            </div>
@@ -623,13 +636,13 @@ export default function App() {
       {/* PRINT-ONLY AREA */}
       <div className="hidden print:block font-sans p-8 space-y-6">
         <center className="space-y-1">
-          <h1 className="text-2xl font-bold text-slate-900 uppercase">Ficha Técnica de Corte</h1>
+          <h1 className="text-2xl font-bold text-slate-50 uppercase">Ficha Técnica de Corte</h1>
           <p className="text-xs text-slate-500 font-mono">Calculadora de Pliego</p>
         </center>
 
-        <div className="border-t border-b border-slate-300 py-4 grid grid-cols-2 gap-4 text-xs">
+        <div className="border-t border-b border-slate-600 py-4 grid grid-cols-2 gap-4 text-xs">
           <div>
-            <h3 className="font-bold underline text-slate-800">MATERIAL BASE</h3>
+            <h3 className="font-bold underline text-slate-100">MATERIAL BASE</h3>
             <p className="mt-1"><strong>Formato Seleccionado:</strong> {currentFormatDetails?.name}</p>
             <p><strong>Dimensiones Corte:</strong> {currentFormatDetails?.dimensions}</p>
             {isCustomMode && (
@@ -640,7 +653,7 @@ export default function App() {
             )}
           </div>
           <div>
-            <h3 className="font-bold underline text-slate-800">CÓMPUTO DE PRENSA</h3>
+            <h3 className="font-bold underline text-slate-100">CÓMPUTO DE PRENSA</h3>
             <p className="mt-1"><strong>Cantidad Solicitada:</strong> {targetQuantity.toLocaleString()} unidades</p>
             <p><strong>Rendimiento por Pliego:</strong> {activeLayout?.piecesPerSheet} piezas/pliego</p>
             <p><strong>Pliegos Netos Necesarios:</strong> {activeLayout?.totalSheetsNeeded} pliegos</p>

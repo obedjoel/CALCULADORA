@@ -73,12 +73,12 @@ export default function VisualSheetCanvas({
   const yTicks = Array.from({ length: Math.floor(sheetLength / tickInterval) + 1 }, (_, i) => i * tickInterval);
 
   return (
-    <div id="visual-canvas-container" className="flex flex-col bg-white border border-slate-200/60 rounded-3xl overflow-hidden h-full shadow-sm text-slate-800">
+    <div id="visual-canvas-container" className="flex flex-col bg-slate-900 border border-slate-700/60 rounded-3xl overflow-hidden h-full shadow-sm text-slate-100">
       {/* Header controls with modern Material styling */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-800/50">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-indigo-505 bg-indigo-500 animate-pulse" />
-          <span className="text-xs font-bold text-slate-700 uppercase tracking-widest font-sans">VISTA DE MODELACIÓN</span>
+          <span className="h-2 w-2 rounded-full bg-indigo-500 bg-indigo-600 animate-pulse" />
+          <span className="text-xs font-bold text-slate-200 uppercase tracking-widest font-sans">VISTA DE MODELACIÓN</span>
         </div>
         
         <div className="flex items-center gap-2">
@@ -86,7 +86,7 @@ export default function VisualSheetCanvas({
             id="toggle-rulers-btn"
             onClick={() => setShowRulers(!showRulers)}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider border cursor-pointer transition-all ${
-              showRulers ? 'bg-indigo-650 text-white border-indigo-650 shadow-sm' : 'bg-white text-slate-650 border-slate-200 hover:bg-slate-50'
+              showRulers ? 'bg-indigo-650 text-white border-indigo-650 shadow-sm' : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800'
             }`}
             title="Mostrar Reglas y Escala"
           >
@@ -98,7 +98,7 @@ export default function VisualSheetCanvas({
             id="toggle-coords-btn"
             onClick={() => setShowCoordinates(!showCoordinates)}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider border cursor-pointer transition-all ${
-              showCoordinates ? 'bg-indigo-650 text-white border-indigo-650 shadow-sm' : 'bg-white text-slate-650 border-slate-200 hover:bg-slate-50'
+              showCoordinates ? 'bg-indigo-650 text-white border-indigo-650 shadow-sm' : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800'
             }`}
             title="Mostrar Cotas de Posición"
           >
@@ -111,7 +111,7 @@ export default function VisualSheetCanvas({
       {/* SVG Canvas Workspace with Workspace tint */}
       <div 
         ref={containerRef} 
-        className="relative flex-1 bg-[#f0f4f9] flex items-center justify-center overflow-hidden min-h-[350px] cursor-crosshair select-none border-b border-slate-150"
+        className="relative flex-1 bg-[#0f172a] flex items-center justify-center overflow-hidden min-h-[350px] cursor-crosshair select-none border-b border-slate-150"
       >
         <svg 
           id="sheet-svg-canvas"
@@ -153,7 +153,7 @@ export default function VisualSheetCanvas({
               height={svgHeight}
               rx={3}
               ry={3}
-              fill="rgba(15,23,42,0.06)"
+              fill="rgba(0,0,0,0.5)"
             />
             
             {/* Pliego base rectangle */}
@@ -165,7 +165,7 @@ export default function VisualSheetCanvas({
               height={svgHeight}
               rx={2}
               ry={2}
-              fill="#ffffff"
+              fill="#1e293b"
               stroke="#64748b"
               strokeWidth={1.5}
             />
@@ -190,7 +190,7 @@ export default function VisualSheetCanvas({
                   y={marginOffset * scale}
                   width={(sheetWidth - 2 * marginOffset) * scale}
                   height={(sheetLength - 2 * marginOffset) * scale}
-                  fill="#ffffff"
+                  fill="#1e293b"
                   stroke="#94a3b8"
                   strokeDasharray="4,4"
                   strokeWidth={1}
@@ -206,7 +206,7 @@ export default function VisualSheetCanvas({
                 y={0}
                 width={svgWidth}
                 height={svgHeight}
-                fill="#ffffff"
+                fill="#1e293b"
               />
             )}
 
@@ -520,7 +520,7 @@ export default function VisualSheetCanvas({
 
         {/* Dynamic Tooltip inside Canvas for hovered element */}
         {hoveredPiece && (
-          <div className="absolute bottom-4 left-4 bg-slate-900 border border-slate-800 text-[11.5px] font-mono text-slate-300 px-4 py-3 rounded-2xl shadow-lg pointer-events-none z-10 min-w-[200px]">
+          <div className="absolute bottom-4 left-4 bg-slate-950 border border-slate-800 text-[11.5px] font-mono text-slate-300 px-4 py-3 rounded-2xl shadow-lg pointer-events-none z-10 min-w-[200px]">
             <div className="flex items-center gap-1.5 text-white font-bold uppercase tracking-wider mb-1 text-[10px]">
               <Crop className="h-3 w-3 text-indigo-400" />
               <span>CORTES DETALLE</span>
@@ -533,10 +533,10 @@ export default function VisualSheetCanvas({
       </div>
 
       {/* Footer Details showing legends */}
-      <div className="bg-slate-50/55 px-5 py-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-600 font-medium">
+      <div className="bg-slate-800/55 px-5 py-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-300 font-medium">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full border border-slate-300 bg-white inline-block shadow-sm" />
+            <span className="h-3 w-3 rounded-full border border-slate-600 bg-slate-900 inline-block shadow-sm" />
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">DIRECTA ({sheetWidth > 0 && pieces.filter(p => !p.isRotated).length})</span>
           </div>
           <div className="flex items-center gap-2">

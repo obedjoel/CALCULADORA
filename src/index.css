@@ -8,7 +8,7 @@
 }
 
 body {
-  background-color: #F2F2F2;
-  color: #000000;
+  background-color: #020617; /* Slate 950 */
+  color: #f8fafc; /* Slate 50 */
   font-family: var(--font-sans);
 }
